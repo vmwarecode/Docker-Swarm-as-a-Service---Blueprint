@@ -1,0 +1,86 @@
+'@type': "SoftwareComponentType"
+createdDate: "2016-03-02T00:26:53.852Z"
+lastUpdated: "2016-03-03T23:39:19.465Z"
+id: "Software.DockerSwarmNode"
+name: "Swarm Node"
+description: "Installs DOcker and adds node to Swarm Cluster"
+publishStatus: "PUBLISHED"
+publishStatusName: "Published"
+schema:
+  fields:
+  - id: "host"
+    label: "Container"
+    description: ""
+    dataType:
+      type: "ref"
+      componentTypeId: "com.vmware.csp.iaas.blueprint.service"
+      classId: "Infrastructure.Machine.Schema"
+      label: "Machine"
+    state:
+      dependencies: []
+      facets:
+      - type: "visible"
+        value:
+          type: "constantClause"
+          value:
+            type: "boolean"
+            value: false
+      - type: "mandatory"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+    isMultiValued: false
+  - id: "TOKEN"
+    label: "TOKEN"
+    description: ""
+    dataType:
+      type: "primitive"
+      typeId: "STRING"
+    state:
+      dependencies: []
+      facets:
+      - type: "defaultValue"
+        value:
+          type: "constant"
+          value:
+            type: "string"
+            value: ""
+    isMultiValued: false
+containerFieldId: "host"
+lifecycleTasks:
+- createdDate: "2016-03-02T00:26:53.853Z"
+  lastUpdated: "2016-03-03T23:39:19.465Z"
+  script:
+    scriptContent: "#Allow TCP connections\necho OPTIONS='-H tcp://0.0.0.0:2375 -H\
+      \ unix:///var/run/docker.sock' >> /etc/sysconfig/docker\n#Fix Docker storage\n\
+      rm -f /etc/sysconfig/docker-storage\necho \"DOCKER_STORAGE_OPTIONS= -s overlay\"\
+      \ > /etc/sysconfig/docker-storage\nsystemctl enable docker\nsystemctl start\
+      \ docker\nsystemctl status docker"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "CONFIGURE"
+    label: "Configure"
+- createdDate: "2016-03-02T00:26:53.852Z"
+  lastUpdated: "2016-03-03T23:39:19.465Z"
+  script:
+    scriptContent: "#!/bin/bash\n#Get My IP adress and store as variable\nmy_ip=$(hostname\
+      \  -I | cut -f1 -d' ')\necho I figured out my IP address and here it is $my_ip\n\
+      docker run -d swarm join --addr=$my_ip:2375 token://$TOKEN\n"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "START"
+    label: "Start"
+- createdDate: "2016-03-02T00:26:53.852Z"
+  lastUpdated: "2016-03-03T23:39:19.465Z"
+  script:
+    scriptContent: "#!/bin/bash\nsystemctl disable firewalld\nsystemctl stop firewalld\n\
+      yum -y install docker"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "INSTALL"
+    label: "Install"

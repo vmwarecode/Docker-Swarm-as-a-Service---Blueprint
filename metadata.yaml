@@ -1,0 +1,17 @@
+name: "auto-generated-pkg-e575af03-3133-4084-a595-df1a05fd2297"
+productVersion: "7.0.0-SNAPSHOT"
+data:
+- locator: "composite-blueprint/DockerSwarm.yaml"
+  name: "DockerSwarm"
+  description: "DockerSwarm"
+  dependencies:
+  - "software-component/Software.DockerSwarmNode.yaml"
+  - "software-component/Software.DockerSwarmManager.yaml"
+- locator: "software-component/Software.DockerSwarmNode.yaml"
+  name: "Swarm Node"
+  description: "Installs DOcker and adds node to Swarm Cluster"
+- locator: "software-component/Software.DockerSwarmManager.yaml"
+  name: "Swarm Manager"
+  description: "Creates cluster and Docker Swarm Manager and also becomes a node in\
+    \ cluster. "
+exportTime: "2016-03-04T00:49:03.216Z"

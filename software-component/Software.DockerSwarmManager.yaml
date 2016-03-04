@@ -1,0 +1,111 @@
+'@type': "SoftwareComponentType"
+createdDate: "2016-03-03T22:07:07.526Z"
+lastUpdated: "2016-03-03T23:38:59.020Z"
+id: "Software.DockerSwarmManager"
+name: "Swarm Manager"
+description: "Creates cluster and Docker Swarm Manager and also becomes a node in\
+  \ cluster. "
+publishStatus: "PUBLISHED"
+publishStatusName: "Published"
+schema:
+  fields:
+  - id: "API_Address"
+    label: "API_Address"
+    description: "Swarm Manager IP address"
+    dataType:
+      type: "primitive"
+      typeId: "STRING"
+    state:
+      dependencies: []
+      facets:
+      - type: "derivedValue"
+        value:
+          type: "constant"
+      - type: "editable"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: false
+    isMultiValued: false
+  - id: "host"
+    label: "Container"
+    description: ""
+    dataType:
+      type: "ref"
+      componentTypeId: "com.vmware.csp.iaas.blueprint.service"
+      classId: "Infrastructure.Machine.Schema"
+      label: "Machine"
+    state:
+      dependencies: []
+      facets:
+      - type: "visible"
+        value:
+          type: "constantClause"
+          value:
+            type: "boolean"
+            value: false
+      - type: "mandatory"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: true
+    isMultiValued: false
+  - id: "TOKEN"
+    label: "TOKEN"
+    description: ""
+    dataType:
+      type: "primitive"
+      typeId: "STRING"
+    state:
+      dependencies: []
+      facets:
+      - type: "derivedValue"
+        value:
+          type: "constant"
+      - type: "editable"
+        value:
+          type: "constant"
+          value:
+            type: "boolean"
+            value: false
+    isMultiValued: false
+containerFieldId: "host"
+lifecycleTasks:
+- createdDate: "2016-03-03T22:07:07.546Z"
+  lastUpdated: "2016-03-03T23:38:59.020Z"
+  script:
+    scriptContent: "#!/bin/bash\nTOKEN=\"$(docker run --rm swarm create)\""
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "CONFIGURE"
+    label: "Configure"
+- createdDate: "2016-03-03T22:07:07.539Z"
+  lastUpdated: "2016-03-03T23:38:59.020Z"
+  script:
+    scriptContent: "#!/bin/bash\n#Get My IP adress and store as variable\nmy_ip=$(hostname\
+      \  -I | cut -f1 -d' ')\necho If I figured out my IP address then here it is\
+      \ $my_ip\ndocker run -d swarm join --addr=$my_ip:2375 token://$TOKEN\ndocker\
+      \ run -d -p 8333:2375 swarm manage token://$TOKEN\nAPI_Address=$my_ip:8333\n\
+      \n\n\n\n\n"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "START"
+    label: "Start"
+- createdDate: "2016-03-03T22:07:07.547Z"
+  lastUpdated: "2016-03-03T23:38:59.020Z"
+  script:
+    scriptContent: "#!/bin/bash\nsystemctl disable firewalld\nsystemctl stop firewalld\n\
+      yum -y install docker\n#Fix Docker storage\nrm -f /etc/sysconfig/docker-storage\n\
+      echo \"DOCKER_STORAGE_OPTIONS= -s overlay\" > /etc/sysconfig/docker-storage\n\
+      #Enable TCP connection for Docker Deamon\necho OPTIONS='-H tcp://0.0.0.0:2375\
+      \ -H unix:///var/run/docker.sock' >> /etc/sysconfig/docker\n#Start Docker\n\
+      systemctl enable docker\nsystemctl start docker\nsystemctl status docker"
+    isRebootAfter: false
+    scriptTypeId: "Bash"
+  taskDescriptorRef:
+    id: "INSTALL"
+    label: "Install"
